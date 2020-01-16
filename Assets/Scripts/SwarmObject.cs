@@ -5,17 +5,17 @@
 public class SwarmObject : MonoBehaviour
 {
     public Vector3 InitialPosition { get { return _initialPosition; } }
-    public int Index { get { return _index; } }
+    public Vector2Int Index { get { return _index; } }
 
     [SerializeField] private Vector3 _initialPosition;
-    [SerializeField] private int _index;
+    [SerializeField] private Vector2Int _index;
 
     public void SetInitialPosition (Vector3 pos)
     {
         _initialPosition = pos;
     }
 
-    public void SetIndex (int index)
+    public void SetIndex (Vector2Int index)
     {
         _index = index;
     }

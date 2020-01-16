@@ -29,7 +29,7 @@ public class ObjectPlacer : MonoBehaviour
     public enum GridCellType { Triangle, Square };
     public enum Direction { Down, Up, Left, Right, Forward, Back };
 
-    [HideInInspector] public SwarmObject[] swarmObjectArray;
+    [HideInInspector] public SwarmObject[,] swarmObjectArray;
 
     private void Start ()
     {
@@ -45,7 +45,7 @@ public class ObjectPlacer : MonoBehaviour
             DestroyImmediate(child);
         }
 
-        swarmObjectArray = new SwarmObject[xCount * yCount];
+        swarmObjectArray = new SwarmObject[xCount, yCount];
     }
 
     private Vector3 GetRayHitPositionOnSurface (Vector3 origin)
@@ -90,9 +90,9 @@ public class ObjectPlacer : MonoBehaviour
             float half_spacing = spacing / 2;
             float tri_height = Mathf.Sqrt(spacing * spacing - half_spacing * half_spacing);
 
-            for (int i = 0, y = 0; y < yCount; y++)
+            for (int y = 0; y < yCount; y++)
             {
-                for (int x = 0; x < xCount; x++, i++)
+                for (int x = 0; x < xCount; x++)
                 {
                     pos = parentPosition;
                     if (gridCellType == GridCellType.Triangle)
@@ -122,8 +122,8 @@ public class ObjectPlacer : MonoBehaviour
 
                         var swarwObj = obj.GetComponent<SwarmObject>();
                         swarwObj.SetInitialPosition(pos);
-                        swarwObj.SetIndex(i);
-                        swarmObjectArray[i] = swarwObj;
+                        swarwObj.SetIndex(new Vector2Int(x, y));
+                        swarmObjectArray[x, y] = swarwObj;
                     }
                 }
             }
