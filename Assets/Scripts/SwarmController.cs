@@ -9,8 +9,8 @@ public class SwarmController : MonoBehaviour
     [Header("Primary Effect")]
     public OnClickBehaviour behaviour;
     public int size;
-    public float time;
-    public float amplitude;
+    public float time = 1f;
+    public float amplitude = 1f;
     public float falloff;
 
     public enum OnClickBehaviour { Ripple, WaveX, WaveY };
@@ -31,8 +31,14 @@ public class SwarmController : MonoBehaviour
                 SwarmObject obj = GetObjectUnderMouse();
                 if (obj != null)
                 {
-                    print(obj.Index);
-                    print(obj.InitialPosition);
+                    List<SwarmObject>[] neighbours = GetNeighbours(obj);
+                    foreach (var list_item in neighbours)
+                    {
+                        foreach (SwarmObject item in list_item)
+                        {
+                            item.transform.Translate(Vector3.up * amplitude * Time.deltaTime);
+                        }
+                    }
                 }
             }
         }
@@ -60,12 +66,34 @@ public class SwarmController : MonoBehaviour
 
         if (behaviour == OnClickBehaviour.Ripple)
         {
-            foreach (var list_item in array)
+            for (int i = 0; i < size; i++)
             {
-                //var n1 =
-                //var n2 =
-                //var n3 =
-                //var n4 =
+                array[i] = new List<SwarmObject>();
+                if (i == 0)
+                {
+                    array[i].Add(obj);
+                }
+                else
+                {
+                    foreach (SwarmObject item in array[i-1])
+                    {
+                        var i1 = new Vector2Int(item.Index.x + 1, item.Index.y);
+                        var i2 = new Vector2Int(item.Index.x - 1, item.Index.y);
+                        var i3 = new Vector2Int(item.Index.x, item.Index.y + 1);
+                        var i4 = new Vector2Int(item.Index.x, item.Index.y - 1);
+                        foreach (var index in new Vector2Int[] { i1, i2, i3, i4 })
+                        {
+                            if (_IsIndexInRange(index))
+                            {
+                                SwarmObject neighbour = objectPlacer.swarmObjectArray[index.x, index.y];
+                                if (!_IsObjectCollected(neighbour, array, i))
+                                {
+                                    array[i].Add(neighbour);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         return array;
@@ -80,13 +108,17 @@ public class SwarmController : MonoBehaviour
         return false;
     }
 
-    private bool _IsObjectCollected (SwarmObject obj, List<SwarmObject>[] array)
+    private bool _IsObjectCollected (SwarmObject obj, List<SwarmObject>[] array, int index, int searchDepth=1)
     {
-        foreach (var list_item in array)
+        for (int i = index + 1, j = 0; i-- > 0; j++)
         {
-            if (list_item.Contains(obj))
+            if (array[i].Contains(obj))
             {
                 return true;
+            }
+            if (j > searchDepth)
+            {
+                break;
             }
         }
         return false;
