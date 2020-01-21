@@ -9,9 +9,11 @@ public class SwarmController : MonoBehaviour
     [Header("Primary Effect")]
     public OnClickBehaviour behaviour;
     public int size;
-    public float time = 1f;
-    public float amplitude = 1f;
-    public float falloff;
+    public float distanceFalloff;
+    public float delay;
+    public float speed;
+    public float amplitude;
+    public float amplitudeFalloff;
 
     public enum OnClickBehaviour { Ripple, WaveX, WaveY };
 
@@ -32,11 +34,12 @@ public class SwarmController : MonoBehaviour
                 if (obj != null)
                 {
                     List<SwarmObject>[] neighbours = objectPlacer.GetNeighbours(obj, size);
-                    foreach (var list_item in neighbours)
+                    for (int i = 0; i < neighbours.Length; i++)
                     {
-                        foreach (SwarmObject item in list_item)
+                        foreach (SwarmObject item in neighbours[i])
                         {
-                            item.transform.Translate(Vector3.up * amplitude * Time.deltaTime);
+                            item.Wobble(objectPlacer.GetDirection(), amplitude - distanceFalloff * i, speed, amplitudeFalloff, delay * i);
+                            //item.transform.Translate(Vector3.up * amplitude * Time.deltaTime);
                         }
                     }
                 }

@@ -139,6 +139,21 @@ public class ObjectPlacer : MonoBehaviour
         return array;
     }
 
+    public Vector3 GetDirection ()
+    {
+        if (RayCastDirection == Direction.Up)
+            return Vector3.up;
+        if (RayCastDirection == Direction.Left)
+            return Vector3.left;
+        if (RayCastDirection == Direction.Right)
+            return Vector3.right;
+        if (RayCastDirection == Direction.Forward)
+            return Vector3.forward;
+        if (RayCastDirection == Direction.Back)
+            return Vector3.back;
+        return Vector3.down;
+    }
+
     private Vector3 GetRandomValue (Vector3 range)
     {
         var result = new Vector3(Random.Range(range.x, -range.x), Random.Range(range.y, -range.y), Random.Range(range.z, -range.z));
@@ -169,21 +184,6 @@ public class ObjectPlacer : MonoBehaviour
             }
         }
         return origin;
-    }
-
-    private Vector3 GetDirection ()
-    {
-        if (RayCastDirection == Direction.Up)
-            return Vector3.up;
-        if (RayCastDirection == Direction.Left)
-            return Vector3.left;
-        if (RayCastDirection == Direction.Right)
-            return Vector3.right;
-        if (RayCastDirection == Direction.Forward)
-            return Vector3.forward;
-        if (RayCastDirection == Direction.Back)
-            return Vector3.back;
-        return Vector3.down;
     }
 
     private bool _IsIndexInRange (Vector2Int index)
