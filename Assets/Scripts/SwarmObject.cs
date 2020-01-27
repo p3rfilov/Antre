@@ -22,23 +22,28 @@ public class SwarmObject : MonoBehaviour
         _index = index;
     }
 
-    public void Wobble (Vector3 direction, float amplitude, float speed, float falloff, float delay)
+    public void Wobble (Vector3 direction, float amplitude, float amplitudeCutoff, float speed, float time, float delay)
     {
         if (!Active)
         {
-            StartCoroutine(_Wobble(direction, amplitude, speed, falloff, delay));
+            StartCoroutine(_Wobble(direction, amplitude, amplitudeCutoff, speed, time, delay));
         }
     }
 
-    private IEnumerator _Wobble (Vector3 direction, float amplitude, float speed, float falloff, float delay)
+    private IEnumerator _Wobble (Vector3 direction, float amplitude, float amplitudeCutoff, float speed, float time, float delay)
     {
         Active = true;
+        float _Elapsedtime = 0f;
+        float _velocity = 0f;
+
         yield return new WaitForSeconds(delay);
-        transform.position += direction * amplitude;
-        while (transform.position != InitialPosition)
+        var _ampl = amplitude;
+        while (_ampl > amplitudeCutoff)
         {
-            //print("Wobble");
-            transform.position = InitialPosition + direction * amplitude * Mathf.Sin(speed * Time.time);
+            _Elapsedtime += Time.deltaTime;
+            transform.position = InitialPosition + direction * _ampl * Mathf.Sin(speed * _Elapsedtime + delay * 20f);
+            _ampl = Mathf.SmoothDamp(_ampl, 0f, ref _velocity, time);
+            yield return new WaitForFixedUpdate();
         }
         Active = false;
     }

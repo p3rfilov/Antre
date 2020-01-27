@@ -12,8 +12,9 @@ public class SwarmController : MonoBehaviour
     public float distanceFalloff;
     public float delay;
     public float speed;
+    public float time;
     public float amplitude;
-    public float amplitudeFalloff;
+    public float amplitudeCutoff;
 
     public enum OnClickBehaviour { Ripple, WaveX, WaveY };
 
@@ -31,15 +32,15 @@ public class SwarmController : MonoBehaviour
             if (Input.GetButtonDown("Fire1"))
             {
                 SwarmObject obj = GetObjectUnderMouse();
-                if (obj != null)
+                if (obj != null && !obj.Active)
                 {
                     List<SwarmObject>[] neighbours = objectPlacer.GetNeighbours(obj, size);
                     for (int i = 0; i < neighbours.Length; i++)
                     {
                         foreach (SwarmObject item in neighbours[i])
                         {
-                            item.Wobble(objectPlacer.GetDirection(), amplitude - distanceFalloff * i, speed, amplitudeFalloff, delay * i);
-                            //item.transform.Translate(Vector3.up * amplitude * Time.deltaTime);
+                            float _amp = amplitude - distanceFalloff * i;
+                            item.Wobble(objectPlacer.GetDirection(), _amp, amplitudeCutoff, speed, time, delay * i);
                         }
                     }
                 }
