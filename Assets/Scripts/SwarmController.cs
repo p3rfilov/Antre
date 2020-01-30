@@ -39,8 +39,11 @@ public class SwarmController : MonoBehaviour
                     {
                         foreach (SwarmObject item in neighbours[i])
                         {
-                            float _amp = amplitude - distanceFalloff * i;
-                            item.Wobble(objectPlacer.GetDirection(), _amp, amplitudeCutoff, speed, time, delay * i);
+                            if (item != null)
+                            {
+                                float _amp = amplitude - distanceFalloff * i;
+                                item.Wobble(objectPlacer.GetDirection(), _amp, amplitudeCutoff, speed, time, delay * i);
+                            }
                         }
                     }
                 }

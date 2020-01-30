@@ -26,6 +26,7 @@ public class ObjectPlacer : MonoBehaviour
     public Collider surfaceCollider;
     public Direction RayCastDirection;
     public float surfaceOffset;
+    public bool discardOnMiss;
 
     public enum GridCellType { Triangle, Square };
     public enum Direction { Down, Up, Left, Right, Forward, Back };
@@ -70,6 +71,10 @@ public class ObjectPlacer : MonoBehaviour
                     }
 
                     pos = GetRayHitPositionOnSurface(pos);
+                    if (discardOnMiss && pos == Vector3.zero)
+                    {
+                        continue;
+                    }
                     pos += GetRandomValue(randomPositionOffset);
                     rot = initialRotation + GetRandomValue(randomRotationOffset);
                     scale = initialScale + GetRandomValue(randomScaleOffset);
@@ -105,31 +110,34 @@ public class ObjectPlacer : MonoBehaviour
             {
                 foreach (SwarmObject item in array[i - 1])
                 {
-                    Vector2Int[] nIndexes;
-                    var i1 = new Vector2Int(item.Index.x + 1, item.Index.y);
-                    var i2 = new Vector2Int(item.Index.x - 1, item.Index.y);
-                    var i3 = new Vector2Int(item.Index.x, item.Index.y + 1);
-                    var i4 = new Vector2Int(item.Index.x, item.Index.y - 1);
+                    if (item != null)
+                    {
+                        Vector2Int[] nIndexes;
+                        var i1 = new Vector2Int(item.Index.x + 1, item.Index.y);
+                        var i2 = new Vector2Int(item.Index.x - 1, item.Index.y);
+                        var i3 = new Vector2Int(item.Index.x, item.Index.y + 1);
+                        var i4 = new Vector2Int(item.Index.x, item.Index.y - 1);
 
-                    if (gridCellType == GridCellType.Square)
-                    {
-                        nIndexes = new Vector2Int[] { i1, i2, i3, i4 };
-                    }
-                    else // due to the grid being shifted halfway forward in y, we get 2 additional (odd/even row-dependant) neighbours at y + 1 and y + 1
-                    {
-                        var i5 = new Vector2Int(item.Index.x + (item.Index.y % 2 != 0 ? 1 : -1), item.Index.y + 1);
-                        var i6 = new Vector2Int(item.Index.x + (item.Index.y % 2 != 0 ? 1 : -1), item.Index.y - 1);
-                        nIndexes = new Vector2Int[] { i1, i2, i3, i4, i5, i6 };
-                    }
-
-                    foreach (var index in nIndexes)
-                    {
-                        if (_IsIndexInRange(index))
+                        if (gridCellType == GridCellType.Square)
                         {
-                            SwarmObject neighbour = swarmObjectArray[index.x, index.y];
-                            if (!_IsObjectCollected(neighbour, array, i))
+                            nIndexes = new Vector2Int[] { i1, i2, i3, i4 };
+                        }
+                        else // due to the grid being shifted halfway forward in y, we get 2 additional (odd/even row-dependant) neighbours at y + 1 and y + 1
+                        {
+                            var i5 = new Vector2Int(item.Index.x + (item.Index.y % 2 != 0 ? 1 : -1), item.Index.y + 1);
+                            var i6 = new Vector2Int(item.Index.x + (item.Index.y % 2 != 0 ? 1 : -1), item.Index.y - 1);
+                            nIndexes = new Vector2Int[] { i1, i2, i3, i4, i5, i6 };
+                        }
+
+                        foreach (var index in nIndexes)
+                        {
+                            if (_IsIndexInRange(index))
                             {
-                                array[i].Add(neighbour);
+                                SwarmObject neighbour = swarmObjectArray[index.x, index.y];
+                                if (!_IsObjectCollected(neighbour, array, i))
+                                {
+                                    array[i].Add(neighbour);
+                                }
                             }
                         }
                     }
@@ -181,6 +189,10 @@ public class ObjectPlacer : MonoBehaviour
             if (surfaceCollider.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
             {
                 return hit.point + dir * -surfaceOffset;
+            }
+            else if (discardOnMiss)
+            {
+                return Vector3.zero;
             }
         }
         return origin;
