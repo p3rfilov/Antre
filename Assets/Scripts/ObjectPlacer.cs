@@ -24,16 +24,18 @@ public class ObjectPlacer : MonoBehaviour
 
     [Header("Place on Surface")]
     public Collider surfaceCollider;
-    public Direction RayCastDirection;
+    public Direction rayCastDirection;
     public float surfaceOffset;
     public bool discardOnMiss;
 
     public enum GridCellType { Triangle, Square };
     public enum Direction { Down, Up, Left, Right, Forward, Back };
 
+    [HideInInspector] public string transformName;
     [HideInInspector] public SwarmObject[,] swarmObjectArray;
 
-    private void Start ()
+
+    private void Awake ()
     {
         PlaceObjects();
     }
@@ -43,51 +45,52 @@ public class ObjectPlacer : MonoBehaviour
         Init();
         if (objects != null && objects.Length > 0)
         {
-            Vector3 pos;
-            Vector3 rot;
-            Vector3 scale;
+            Vector3 _pos;
+            Vector3 _rot;
+            Vector3 _scale;
 
-            Vector3 parentPosition = transform.position;
-            float half_spacing = spacing / 2;
-            float tri_height = Mathf.Sqrt(spacing * spacing - half_spacing * half_spacing);
+            Vector3 _parentPosition = transform.position;
+            float _halfSpacing = spacing / 2;
+            float _triHeight = Mathf.Sqrt(spacing * spacing - _halfSpacing * _halfSpacing);
 
             for (int y = 0; y < yCount; y++)
             {
                 for (int x = 0; x < xCount; x++)
                 {
-                    pos = parentPosition;
+                    _pos = _parentPosition;
                     if (gridCellType == GridCellType.Triangle)
                     {
                         float offset = 0;
                         if (y % 2 != 0) // shift every odd row halfway forward
                         {
-                            offset = half_spacing;
+                            offset = _halfSpacing;
                         }
-                        pos += new Vector3(x * spacing + offset, 0f, y * tri_height);
+                        _pos += new Vector3(x * spacing + offset, 0f, y * _triHeight);
                     }
                     else
                     {
-                        pos += new Vector3(x * spacing, 0f, y * spacing);
+                        _pos += new Vector3(x * spacing, 0f, y * spacing);
                     }
 
-                    pos = GetRayHitPositionOnSurface(pos);
-                    if (discardOnMiss && pos == Vector3.zero)
+                    _pos = GetRayHitPositionOnSurface(_pos);
+                    if (discardOnMiss && _pos == Vector3.zero)
                     {
                         continue;
                     }
-                    pos += GetRandomValue(randomPositionOffset);
-                    rot = initialRotation + GetRandomValue(randomRotationOffset);
-                    scale = initialScale + GetRandomValue(randomScaleOffset);
+                    _pos += GetRandomValue(randomPositionOffset);
+                    _rot = initialRotation + GetRandomValue(randomRotationOffset);
+                    _scale = initialScale + GetRandomValue(randomScaleOffset);
 
                     SwarmObject _obj = objects[Random.Range(0, objects.Length)];
                     if (_obj != null)
                     {
-                        GameObject obj = Instantiate(_obj.gameObject, pos, Quaternion.Euler(rot), transform);
-                        obj.transform.localScale = scale;
+                        GameObject obj = Instantiate(_obj.gameObject, _pos, Quaternion.Euler(_rot), transform);
+                        obj.transform.localScale = _scale;
 
                         var swarwObj = obj.GetComponent<SwarmObject>();
-                        swarwObj.SetInitialPosition(pos);
+                        swarwObj.SetInitialPosition(_pos);
                         swarwObj.SetIndex(new Vector2Int(x, y));
+                        swarwObj.SetParentName(transformName);
                         swarmObjectArray[x, y] = swarwObj;
                     }
                 }
@@ -97,18 +100,18 @@ public class ObjectPlacer : MonoBehaviour
 
     public List<SwarmObject>[] GetNeighbours (SwarmObject obj, int count)
     {
-        var array = new List<SwarmObject>[count];
+        var _array = new List<SwarmObject>[count];
 
         for (int i = 0; i < count; i++)
         {
-            array[i] = new List<SwarmObject>();
+            _array[i] = new List<SwarmObject>();
             if (i == 0)
             {
-                array[i].Add(obj);
+                _array[i].Add(obj);
             }
             else
             {
-                foreach (SwarmObject item in array[i - 1])
+                foreach (SwarmObject item in _array[i - 1])
                 {
                     if (item != null)
                     {
@@ -134,9 +137,9 @@ public class ObjectPlacer : MonoBehaviour
                             if (_IsIndexInRange(index))
                             {
                                 SwarmObject neighbour = swarmObjectArray[index.x, index.y];
-                                if (!_IsObjectCollected(neighbour, array, i))
+                                if (!_IsObjectCollected(neighbour, _array, i))
                                 {
-                                    array[i].Add(neighbour);
+                                    _array[i].Add(neighbour);
                                 }
                             }
                         }
@@ -144,20 +147,20 @@ public class ObjectPlacer : MonoBehaviour
                 }
             }
         }
-        return array;
+        return _array;
     }
 
     public Vector3 GetDirection ()
     {
-        if (RayCastDirection == Direction.Up)
+        if (rayCastDirection == Direction.Up)
             return Vector3.up;
-        if (RayCastDirection == Direction.Left)
+        if (rayCastDirection == Direction.Left)
             return Vector3.left;
-        if (RayCastDirection == Direction.Right)
+        if (rayCastDirection == Direction.Right)
             return Vector3.right;
-        if (RayCastDirection == Direction.Forward)
+        if (rayCastDirection == Direction.Forward)
             return Vector3.forward;
-        if (RayCastDirection == Direction.Back)
+        if (rayCastDirection == Direction.Back)
             return Vector3.back;
         return Vector3.down;
     }
@@ -178,6 +181,7 @@ public class ObjectPlacer : MonoBehaviour
         }
 
         swarmObjectArray = new SwarmObject[xCount, yCount];
+        transformName = transform.name;
     }
 
     private Vector3 GetRayHitPositionOnSurface (Vector3 origin)

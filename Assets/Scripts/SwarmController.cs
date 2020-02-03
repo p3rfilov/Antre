@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 [RequireComponent(typeof(ObjectPlacer))]
 public class SwarmController : MonoBehaviour
@@ -39,7 +38,7 @@ public class SwarmController : MonoBehaviour
                     {
                         foreach (SwarmObject item in neighbours[i])
                         {
-                            if (item != null)
+                            if (item != null && objectPlacer.transformName == item.Parent)
                             {
                                 float _amp = amplitude - distanceFalloff * i;
                                 item.Wobble(objectPlacer.GetDirection(), _amp, amplitudeCutoff, speed, time, delay * i);
@@ -58,7 +57,7 @@ public class SwarmController : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
         {
             var obj = hit.transform.GetComponent<SwarmObject>();
-            if (obj != null)
+            if (obj != null && objectPlacer.transformName == obj.Parent)
             {
                 return obj;
             }

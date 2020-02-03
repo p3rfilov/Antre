@@ -5,21 +5,28 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class SwarmObject : MonoBehaviour
 {
-    public Vector3 InitialPosition { get { return _initialPosition; } }
-    public Vector2Int Index { get { return _index; } }
+    public string Parent { get { return parentName; } }
+    public Vector3 InitialPosition { get { return initialPosition; } }
+    public Vector2Int Index { get { return index; } }
     public bool Active { get; set; }
 
-    [SerializeField] private Vector3 _initialPosition;
-    [SerializeField] private Vector2Int _index;
+    [SerializeField] private string parentName;
+    [SerializeField] private Vector3 initialPosition;
+    [SerializeField] private Vector2Int index;
+
+    public void SetParentName (string parentName)
+    {
+        this.parentName = parentName;
+    }
 
     public void SetInitialPosition (Vector3 pos)
     {
-        _initialPosition = pos;
+        initialPosition = pos;
     }
 
     public void SetIndex (Vector2Int index)
     {
-        _index = index;
+        this.index = index;
     }
 
     public void Wobble (Vector3 direction, float amplitude, float amplitudeCutoff, float speed, float time, float delay)
