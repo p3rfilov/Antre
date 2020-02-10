@@ -3,7 +3,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Collider))]
-public class SwarmObject : MonoBehaviour
+public class SwarmObject : MonoBehaviour, IClickable
 {
     public string Parent { get { return parentName; } }
     public Vector3 InitialPosition { get { return initialPosition; } }
@@ -27,6 +27,11 @@ public class SwarmObject : MonoBehaviour
     public void SetIndex (Vector2Int index)
     {
         this.index = index;
+    }
+
+    public void Click ()
+    {
+        print("Clicked: " + this.GetType().Name);
     }
 
     public void Wobble (Vector3 direction, float amplitude, float amplitudeCutoff, float speed, float time, float delay)

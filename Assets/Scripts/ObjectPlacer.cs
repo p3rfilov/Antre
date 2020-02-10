@@ -17,7 +17,7 @@ public class ObjectPlacer : MonoBehaviour
     public float spacing = 1f;
     public GridCellType gridCellType;
 
-    [Header("Randomize Trasforms (+/-)")]
+    [Header("Randomize Transforms (+/-)")]
     public Vector3 randomPositionOffset;
     public Vector3 randomRotationOffset;
     public Vector3 randomScaleOffset;
