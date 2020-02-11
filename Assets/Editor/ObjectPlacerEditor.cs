@@ -12,5 +12,9 @@ public class ObjectSpacerEditor : Editor
         {
             objectPlacer.PlaceObjects();
         }
+        else if (GUILayout.Button("Clear"))
+        {
+            objectPlacer.Clear();
+        }
     }
 }

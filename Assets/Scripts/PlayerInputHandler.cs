@@ -13,7 +13,7 @@ public class PlayerInputHandler : MonoBehaviour
         cam = transform.GetComponent<Camera>();
     }
 
-    private void Update()
+    private void Update ()
     {
         if (Input.GetButtonDown("Fire1"))
         {

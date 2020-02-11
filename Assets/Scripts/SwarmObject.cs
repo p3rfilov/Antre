@@ -5,18 +5,18 @@ using UnityEngine;
 [RequireComponent(typeof(Collider))]
 public class SwarmObject : MonoBehaviour, IClickable
 {
-    public string Parent { get { return parentName; } }
+    public ObjectPlacer Parent { get { return parent; } }
     public Vector3 InitialPosition { get { return initialPosition; } }
     public Vector2Int Index { get { return index; } }
     public bool Active { get; set; }
 
-    [SerializeField] private string parentName;
+    [SerializeField] private ObjectPlacer parent;
     [SerializeField] private Vector3 initialPosition;
     [SerializeField] private Vector2Int index;
 
-    public void SetParentName (string parentName)
+    public void SetParent (ObjectPlacer parent)
     {
-        this.parentName = parentName;
+        this.parent = parent;
     }
 
     public void SetInitialPosition (Vector3 pos)
@@ -31,7 +31,14 @@ public class SwarmObject : MonoBehaviour, IClickable
 
     public void Click ()
     {
-        print("Clicked: " + this.GetType().Name);
+        if (!Active)
+        {
+            var _controller = parent?.transform.GetComponent<SwarmController>();
+            if (_controller != null)
+            {
+                _controller.Activate(this);
+            }
+        }
     }
 
     public void Wobble (Vector3 direction, float amplitude, float amplitudeCutoff, float speed, float time, float delay)
@@ -57,6 +64,7 @@ public class SwarmObject : MonoBehaviour, IClickable
             _ampl = Mathf.SmoothDamp(_ampl, 0f, ref _velocity, time);
             yield return new WaitForFixedUpdate();
         }
+        transform.position = InitialPosition;
         Active = false;
     }
 }

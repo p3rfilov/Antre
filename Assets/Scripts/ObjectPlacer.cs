@@ -31,7 +31,6 @@ public class ObjectPlacer : MonoBehaviour
     public enum GridCellType { Triangle, Square };
     public enum Direction { Down, Up, Left, Right, Forward, Back };
 
-    [HideInInspector] public string transformName;
     [HideInInspector] public SwarmObject[,] swarmObjectArray;
 
 
@@ -40,9 +39,21 @@ public class ObjectPlacer : MonoBehaviour
         PlaceObjects();
     }
 
+    public void Clear ()
+    {
+        int count = transform.childCount;
+        for (int i = count - 1; i >= 0; --i)
+        {
+            GameObject child = transform.GetChild(i).gameObject;
+            DestroyImmediate(child);
+        }
+
+        swarmObjectArray = new SwarmObject[xCount, yCount];
+    }
+
     public void PlaceObjects ()
     {
-        Init();
+        Clear();
         if (objects != null && objects.Length > 0)
         {
             Vector3 _pos;
@@ -88,9 +99,9 @@ public class ObjectPlacer : MonoBehaviour
                         obj.transform.localScale = _scale;
 
                         var swarwObj = obj.GetComponent<SwarmObject>();
+                        swarwObj.SetParent(this);
                         swarwObj.SetInitialPosition(_pos);
                         swarwObj.SetIndex(new Vector2Int(x, y));
-                        swarwObj.SetParentName(transformName);
                         swarmObjectArray[x, y] = swarwObj;
                     }
                 }
@@ -125,7 +136,7 @@ public class ObjectPlacer : MonoBehaviour
                         {
                             nIndexes = new Vector2Int[] { i1, i2, i3, i4 };
                         }
-                        else // due to the grid being shifted halfway forward in y, we get 2 additional (odd/even row-dependant) neighbours at y + 1 and y + 1
+                        else // due to the grid being shifted halfway forward in y, we get 2 additional (odd/even row-dependent) neighbors at y + 1 and y + 1
                         {
                             var i5 = new Vector2Int(item.Index.x + (item.Index.y % 2 != 0 ? 1 : -1), item.Index.y + 1);
                             var i6 = new Vector2Int(item.Index.x + (item.Index.y % 2 != 0 ? 1 : -1), item.Index.y - 1);
@@ -169,19 +180,6 @@ public class ObjectPlacer : MonoBehaviour
     {
         var result = new Vector3(Random.Range(range.x, -range.x), Random.Range(range.y, -range.y), Random.Range(range.z, -range.z));
         return result;
-    }
-
-    private void Init ()
-    {
-        int count = transform.childCount;
-        for (int i = count - 1; i >= 0; --i)
-        {
-            GameObject child = transform.GetChild(i).gameObject;
-            DestroyImmediate(child);
-        }
-
-        swarmObjectArray = new SwarmObject[xCount, yCount];
-        transformName = transform.name;
     }
 
     private Vector3 GetRayHitPositionOnSurface (Vector3 origin)

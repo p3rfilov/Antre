@@ -24,44 +24,29 @@ public class SwarmController : MonoBehaviour
         objectPlacer = transform.GetComponent<ObjectPlacer>();
     }
 
-    private void Update ()
+    public void Activate (SwarmObject obj)
     {
-        if (objectPlacer != null)
+        if (objectPlacer != null && obj != null)
         {
-            if (Input.GetButtonDown("Fire1"))
+            if (behaviour == OnClickBehaviour.Ripple)
             {
-                SwarmObject obj = GetObjectUnderMouse();
-                if (obj != null && !obj.Active)
+                List<SwarmObject>[] neighbours = objectPlacer.GetNeighbours(obj, size);
+                for (int i = 0; i < neighbours.Length; i++)
                 {
-                    List<SwarmObject>[] neighbours = objectPlacer.GetNeighbours(obj, size);
-                    for (int i = 0; i < neighbours.Length; i++)
+                    foreach (SwarmObject item in neighbours[i])
                     {
-                        foreach (SwarmObject item in neighbours[i])
+                        if (item != null && objectPlacer == item.Parent)
                         {
-                            if (item != null && objectPlacer.transformName == item.Parent)
-                            {
-                                float _amp = amplitude - distanceFalloff * i;
-                                item.Wobble(objectPlacer.GetDirection(), _amp, amplitudeCutoff, speed, time, delay * i);
-                            }
+                            float _amp = amplitude - distanceFalloff * i;
+                            item.Wobble(objectPlacer.GetDirection(), _amp, amplitudeCutoff, speed, time, delay * i);
                         }
                     }
                 }
             }
-        }
-    }
-
-    private SwarmObject GetObjectUnderMouse ()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
-        {
-            var obj = hit.transform.GetComponent<SwarmObject>();
-            if (obj != null && objectPlacer.transformName == obj.Parent)
+            else
             {
-                return obj;
+                print("Behavior not defined");
             }
         }
-        return null;
     }
 }
