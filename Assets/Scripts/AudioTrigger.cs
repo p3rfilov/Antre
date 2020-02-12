@@ -9,6 +9,7 @@ public class AudioTrigger : MonoBehaviour, IClickable
 {
     public AudioSource masterSyncTrack;
     public BarFraction waitForBeat;
+    public float fadeTime = 0.5f;
 
     public enum BarFraction { None, Bar = 1, Half=2, Quarter=4, Eighth=8, Sixteenth=16, Thirty_Second=32, Sixty_Fourth=64 };
 
@@ -16,12 +17,16 @@ public class AudioTrigger : MonoBehaviour, IClickable
     private int clipSamples;
     private int lastSampleCount;
     private bool stopped;
+    private bool isCounterRunning;
     private float updateFrequency = 0.01f;
 
     private void Awake ()
     {
         source = transform.GetComponent<AudioSource>();
-        clipSamples = source.clip.samples;
+        if (source != null)
+        {
+            clipSamples = source.clip.samples;
+        }
         ValidateSampleCount();
     }
 
@@ -30,7 +35,10 @@ public class AudioTrigger : MonoBehaviour, IClickable
         if (source != null && !source.isPlaying)
         {
             stopped = false;
-            StartCoroutine(TogglePlayback());
+            if (!isCounterRunning)
+            {
+                StartCoroutine(RunSampleCounter());
+            }
             print("Playing");
         }
         else
@@ -40,53 +48,75 @@ public class AudioTrigger : MonoBehaviour, IClickable
         }
     }
 
-    private IEnumerator TogglePlayback ()
+    private IEnumerator RunSampleCounter ()
     {
+        isCounterRunning = true;
         while (true)
         {
-            yield return new WaitForSeconds(updateFrequency);
             if (masterSyncTrack != null)
             {
                 source.timeSamples = masterSyncTrack.timeSamples;
             }
-            if (waitForBeat == BarFraction.None)
+
+            int _step = clipSamples / (int)waitForBeat;
+            int _sampleMod = source.timeSamples % _step;
+            if (waitForBeat == BarFraction.None || _sampleMod < lastSampleCount)
             {
                 if (stopped)
                 {
-                    source.Stop();
-                    yield break;
+                    StartCoroutine(ChangeVolume(0));
                 }
                 else if (!source.isPlaying)
                 {
-                    source.Play();
+                    StartCoroutine(ChangeVolume(1f));
                 }
             }
-            else
+            lastSampleCount = _sampleMod;
+            yield return new WaitForSeconds(updateFrequency);
+        }
+    }
+
+    private IEnumerator ChangeVolume (float targetVolume)
+    {
+        float _startVolume = source.volume;
+
+        if (!source.isPlaying)
+        {
+            source.Play();
+        }
+
+        if (targetVolume > _startVolume)
+        {
+            print("Fading in");
+            while (source.volume < targetVolume)
             {
-                int _step = clipSamples / (int)waitForBeat;
-                int _sampleMod = source.timeSamples % _step;
-                if (_sampleMod < lastSampleCount)
-                {
-                    if (stopped)
-                    {
-                        source.Stop();
-                        yield break;
-                    }
-                    else if (!source.isPlaying)
-                    {
-                        source.Play();
-                    }
-                }
-                lastSampleCount = _sampleMod;
+                source.volume += targetVolume * Time.deltaTime / fadeTime;
+                yield return new WaitForSeconds(updateFrequency);
             }
         }
+        else
+        {
+            print("Fading out");
+            while (source.volume > targetVolume)
+            {
+                source.volume -= _startVolume * Time.deltaTime / fadeTime;
+                yield return new WaitForSeconds(updateFrequency);
+            }
+        }
+        source.volume = targetVolume;
+
+        if (source.volume == 0)
+        {
+            source.Stop();
+        }
+        print("Fading done");
     }
 
     private void ValidateSampleCount ()
     {
-        if (masterSyncTrack != null && source != null)
+        if (masterSyncTrack != null)
         {
-            if (masterSyncTrack.clip.samples != source.clip.samples)
+            if (masterSyncTrack.clip.samples != clipSamples)
             {
                 Debug.LogWarning("The master track and source audio have different sample count. Audio may play out of sync.");
             }
