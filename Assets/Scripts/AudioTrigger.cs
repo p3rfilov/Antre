@@ -5,7 +5,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 [RequireComponent(typeof(AudioSource))]
 [RequireComponent(typeof(Collider))]
-public class AudioTrigger : MonoBehaviour, IClickable
+public class AudioTrigger : MonoBehaviour
 {
     public AudioSource masterSyncTrack;
     public BarFraction waitForBeat;
@@ -30,7 +30,7 @@ public class AudioTrigger : MonoBehaviour, IClickable
         ValidateSampleCount();
     }
 
-    public void Click ()
+    private void OnMouseDown ()
     {
         if (source != null && !source.isPlaying)
         {

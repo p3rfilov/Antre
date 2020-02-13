@@ -3,7 +3,7 @@ using UnityEngine;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Collider))]
-public class SwarmObject : MonoBehaviour, IClickable
+public class SwarmObject : MonoBehaviour
 {
     public ObjectPlacer Parent { get { return parent; } }
     public Vector3 InitialPosition { get { return initialPosition; } }
@@ -29,7 +29,7 @@ public class SwarmObject : MonoBehaviour, IClickable
         this.index = index;
     }
 
-    public void Click ()
+    private void OnMouseDown ()
     {
         if (!Active)
         {
